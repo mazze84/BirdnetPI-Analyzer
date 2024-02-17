@@ -64,11 +64,3 @@ st.dataframe(birds_df, column_config={
     "Com_Name": "Common Name",
     "min(file_name)": "File Name"
 }, hide_index=True, use_container_width=True)
-
-detections_per_day_df = get_detections_per_day(confidence / 100)
-st.subheader("Detected Birds per Day")
-st.dataframe(detections_per_day_df, column_config={
-    "count": st.column_config.NumberColumn("Detection Count", help="Unique detection of birds", width="small"),
-    "date": st.column_config.DateColumn("First Detection", help="Date of the first detection", format="YYYY-MM-DD"),
-    "name_list": st.column_config.ListColumn("Birds detected", help="The birds detected that day", width="large"),
-}, hide_index=True, use_container_width=True)
