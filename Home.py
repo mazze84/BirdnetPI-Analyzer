@@ -9,6 +9,7 @@ st.set_page_config(
 
 
 def get_newest_bird_detections(confidence, daily=False, ttl=3600):
+    conn = st.connection('birds_db', type='sql')
     where = ""
     if daily:
         today = date.today().isoformat()
@@ -25,22 +26,9 @@ def get_newest_bird_detections(confidence, daily=False, ttl=3600):
     # birds_df['min(date)'] = pd.to_date(birds_df['min(date)'])
     return birds_df
 
-
-def get_detections_per_day(confidence, ttl=3600):
-    detections_per_day_df = conn.query("SELECT COUNT(DISTINCT sci_name) as count, date, "
-                                       " GROUP_CONCAT(DISTINCT com_name) AS name_list "
-                                       " FROM detections"
-                                       " WHERE confidence>= :confidence"
-                                       " GROUP BY Date"
-                                       " ORDER BY COUNT(DISTINCT sci_name) desc"
-                                       " LIMIT 15",
-                                       ttl=ttl, params={"confidence": confidence})
-    return detections_per_day_df
-
-
 st.title("Birdnet Analyzer")
 # Create the SQL connection to pets_db as specified in your secrets file.
-conn = st.connection('birds_db', type='sql')
+
 
 daily = st.sidebar.checkbox("Daily")
 
