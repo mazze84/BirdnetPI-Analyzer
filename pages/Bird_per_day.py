@@ -1,5 +1,5 @@
 import streamlit as st
-from datetime import date
+from datetime import date, time
 import pandas as pd
 
 st.set_page_config(
@@ -7,12 +7,14 @@ st.set_page_config(
     page_icon=':bird:'
 )
 
+
 def get_different_birds(confidence, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 
     different_birds = conn.query("SELECT com_name FROM detections WHERE confidence>= :confidence GROUP BY com_name",
-                               ttl=ttl, params={"confidence": confidence})
+                                 ttl=ttl, params={"confidence": confidence})
     return different_birds
+
 
 def get_detections_per_bird(confidence, common_name, ttl=3600):
     conn = st.connection('birds_db', type='sql')
@@ -26,34 +28,56 @@ def get_detections_per_bird(confidence, common_name, ttl=3600):
                                      ttl=ttl, params={"confidence": confidence, "common_name": common_name})
     return detections_per_bird
 
+
 def get_times_at_date(confidence, date, common_name, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 
     detections_date = conn.query("SELECT time, com_name, sci_name"
-                                     " FROM detections"
-                                     " WHERE com_name= :common_name"
-                                     " AND confidence>= :confidence"
-                                     " AND Date= :date"
-                                     " ORDER BY Date desc",
-                                     ttl=ttl, params={"confidence": confidence, "common_name": common_name, "date": date})
+                                 " FROM detections"
+                                 " WHERE com_name= :common_name"
+                                 " AND confidence>= :confidence"
+                                 " AND Date= :date"
+                                 " ORDER BY Time asc",
+                                 ttl=ttl, params={"confidence": confidence, "common_name": common_name, "date": date})
+    detections_date['Time'] = pd.to_datetime(detections_date['Time'])
+    detections_date['hour_stamp'] = detections_date['Time'].dt.hour
+    detections_date['minute_stamp'] = detections_date['Time'].dt.minute
+
+    time_rounded = []
+    for time_detection in detections_date['Time']:
+        if time_detection.minute > 45:
+            time_rounded.append(time_detection.replace(hour=time_detection.hour+1 ,minute=0, second=0))
+        elif time_detection.minute > 30:
+            time_rounded.append(time_detection.replace(minute=30, second=0))
+        elif time_detection.minute > 15:
+            time_rounded.append(time_detection.replace(minute=30, second=0))
+        else:
+            time_rounded.append(time_detection.replace(minute=0, second=0))
+    detections_date['datetime_rounded'] = time_rounded
     return detections_date
+
 
 st.title("Detections of bird per day")
 if 'confidence' not in st.session_state:
     st.session_state['confidence'] = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
                                help="Confidence for detection of birds in Percent", key='confidence')
-bird = st.selectbox("Select a Bird", get_different_birds(confidence/100))
+bird = st.selectbox("Select a Bird", get_different_birds(confidence / 100))
 
 if bird is not None:
-    detections_24h = get_times_at_date(confidence/100, date.today(), bird)
-    detections_24h['Time'] = pd.to_datetime(detections_24h['Time'])
-    detections_24h['hour_stamp'] = detections_24h['Time'].dt.hour
+    detections_24h = get_times_at_date(confidence / 100, date.today(), bird)
 
-    st.write(detections_24h.groupby('hour_stamp').count())
-    st.line_chart(detections_24h, x='hour_stamp', y='Com_Name')
+    timestamp = []
+    for i in range(24):
+        timestamp.append(time(i, 0))
+        timestamp.append(time(i, 30))
+    # st.write(timestamp)
+    # timeline_df['timestamp24h'] = timestamp
+    st.write(detections_24h)
 
-    detections_per_bird = get_detections_per_bird(confidence/100, bird)
+    st.line_chart(detections_24h, x='datetime_rounded', y='Com_Name')
+
+    detections_per_bird = get_detections_per_bird(confidence / 100, bird)
 
     st.bar_chart(detections_per_bird, x='Date', y='count')
 
@@ -63,4 +87,3 @@ if bird is not None:
         "Com_Name": st.column_config.TextColumn("Common Name", help="common name of the bird", width="medium"),
         "Sci_Name": st.column_config.TextColumn("Scientific Name", help="scientific name of the bird", width="medium"),
     }, hide_index=True, use_container_width=True)
-
