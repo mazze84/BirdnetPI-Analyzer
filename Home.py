@@ -1,6 +1,6 @@
+from pathlib import Path
 import streamlit as st
-from datetime import date, timedelta
-import pandas as pd
+import altair as alt
 
 st.set_page_config(
     page_title="Birdnet Analyzer",
@@ -8,51 +8,54 @@ st.set_page_config(
 )
 
 
-def get_newest_bird_detections(confidence, daily=False, ttl=3600):
+def get_newest_bird_detections(confidence, date_detections, ttl=60):
     conn = st.connection('birds_db', type='sql')
-    where = ""
-    if daily:
-        today = date.today().isoformat()
-        where = f' and date=\'{today}\''
+
     birds_df = conn.query(
-        "select count(*) as count, max(confidence), min(date), sci_name, com_name, min(file_name), min(Cutoff)"
+        "select confidence, date, time, sci_name, com_name, file_name"
         " from detections"
         " where confidence>= :confidence"
-        + where +
-        " group by sci_name"
-        " order by min(date) desc, time desc",
-        ttl=ttl, params={"confidence": confidence})
-    birds_df["max(confidence)"] = birds_df["max(confidence)"] * 100
-    # birds_df['min(date)'] = pd.to_date(birds_df['min(date)'])
+        " and date= :date"
+        " order by date desc, time desc",
+        ttl=ttl, params={"confidence": confidence, "date": date_detections.isoformat()})
+    birds_df["Confidence"] = birds_df["Confidence"] * 100
+
     return birds_df
 
-st.title("Birdnet Analyzer")
-# Create the SQL connection to pets_db as specified in your secrets file.
-
-
-daily = st.sidebar.checkbox("Daily")
 
 if 'confidence' not in st.session_state:
     st.session_state['confidence'] = 70
-
-
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
                                help="Confidence for detection of birds in Percent", key='confidence')
 
-#days = st.sidebar.slider("Days", max_value=365, min_value=1, value=365, help="Days for detection")
-#date_from = date.today() - timedelta(days=days)
+date_detections = st.sidebar.date_input("Date of detections")
 
-birds_df = get_newest_bird_detections(confidence / 100, daily=daily)
-number_new_birds_today = len(birds_df[birds_df['min(date)'] == date.today().isoformat()].index)
-st.metric("Different Birds", len(birds_df.index), f'{number_new_birds_today} new today')
+st.title(f'Birds on {date_detections}')
 
-st.subheader("Newest Birds")
+birds_df = get_newest_bird_detections(confidence / 100, date_detections)
+
+number_detections = birds_df.groupby('Com_Name', as_index=False, sort=True)['Confidence'].count().rename(
+    columns={"Com_Name": "Common Name", "Confidence": "Count"}).sort_values(by='Count', ascending=False)
+# st.write(number_detections)
+st.altair_chart(alt.Chart(number_detections).mark_bar().encode(
+    x=alt.X('Common Name', sort=None),
+    y='Count',
+), use_container_width=True)
+
 st.dataframe(birds_df, column_config={
-    "count": st.column_config.NumberColumn("Detection Count", width="small"),
-    "min(date)": st.column_config.DateColumn("First Detection", help="Date of the first detection",
-                                             format="YYYY-MM-DD"),
-    "max(confidence)": st.column_config.NumberColumn("Confidence", format="%d", width="small"),
+    "Date": st.column_config.DateColumn("Date", help="Date of the first detection",
+                                        format="YYYY-MM-DD"),
+    "Time": st.column_config.TimeColumn("Time", help="Time of the first detection"),
+    "Confidence": st.column_config.NumberColumn("Confidence", format="%d", width="small"),
     "Sci_Name": "Scientific Name",
     "Com_Name": "Common Name",
-    "min(file_name)": "File Name"
+    "File_Name": "File Name"
 }, hide_index=True, use_container_width=True)
+
+if birds_df.size > 0:
+    filename = birds_df['File_Name'][0].replace(':', ' ')
+    bird_name = birds_df['Com_Name'][0]
+    path = Path(f'By_Date/{date_detections}/{bird_name}/{filename}')
+    if path.is_file():
+        st.image(str(path) + '.png', caption=f'{bird_name}')
+        st.audio(str(path))

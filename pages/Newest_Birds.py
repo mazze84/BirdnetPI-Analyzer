@@ -1,0 +1,58 @@
+import streamlit as st
+from datetime import date, timedelta
+import pandas as pd
+
+st.set_page_config(
+    page_title="Birdnet Analyzer",
+    page_icon=':bird:'
+)
+
+
+def get_newest_bird_detections(confidence, daily=False, ttl=3600):
+    conn = st.connection('birds_db', type='sql')
+    where = ""
+    if daily:
+        today = date.today().isoformat()
+        where = f' and date=\'{today}\''
+    birds_df = conn.query(
+        "select count(*) as count, max(confidence), min(date), sci_name, com_name, min(file_name), min(Cutoff)"
+        " from detections"
+        " where confidence>= :confidence"
+        + where +
+        " group by sci_name"
+        " order by min(date) desc, time desc",
+        ttl=ttl, params={"confidence": confidence})
+    birds_df["max(confidence)"] = birds_df["max(confidence)"] * 100
+    # birds_df['min(date)'] = pd.to_date(birds_df['min(date)'])
+    return birds_df
+
+st.title("Birdnet Analyzer")
+# Create the SQL connection to pets_db as specified in your secrets file.
+
+
+daily = st.sidebar.checkbox("Daily")
+
+if 'confidence' not in st.session_state:
+    st.session_state['confidence'] = 70
+
+
+confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
+                               help="Confidence for detection of birds in Percent", key='confidence')
+
+#days = st.sidebar.slider("Days", max_value=365, min_value=1, value=365, help="Days for detection")
+#date_from = date.today() - timedelta(days=days)
+
+birds_df = get_newest_bird_detections(confidence / 100, daily=daily)
+number_new_birds_today = len(birds_df[birds_df['min(date)'] == date.today().isoformat()].index)
+st.metric("Different Birds", len(birds_df.index), f'{number_new_birds_today} new today')
+
+st.subheader("Newest Birds")
+st.dataframe(birds_df, column_config={
+    "count": st.column_config.NumberColumn("Detection Count", width="small"),
+    "min(date)": st.column_config.DateColumn("First Detection", help="Date of the first detection",
+                                             format="YYYY-MM-DD"),
+    "max(confidence)": st.column_config.NumberColumn("Confidence", format="%d", width="small"),
+    "Sci_Name": "Scientific Name",
+    "Com_Name": "Common Name",
+    "min(file_name)": "File Name"
+}, hide_index=True, use_container_width=True)
