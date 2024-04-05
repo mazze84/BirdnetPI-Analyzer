@@ -3,6 +3,6 @@ gatherUsageStats = false
 
 [theme]
 base="light"
-backgroundColor="#77c487"
-secondaryBackgroundColor="#dbffeb"
+backgroundColor="#dbffeb"
+secondaryBackgroundColor="#77c487"
 primaryColor="#9fe29b"
