@@ -39,7 +39,7 @@ def get_times_at_date(confidence, date, common_name, ttl=3600):
                                  " AND Date= :date"
                                  " ORDER BY Time asc",
                                  ttl=ttl, params={"confidence": confidence, "common_name": common_name, "date": date})
-    detections_date['Time'] = pd.to_datetime(detections_date['Time'])
+    detections_date['Time'] = pd.to_datetime(detections_date['Time'], format='%H:%M:%S')
     detections_date['hour_stamp'] = detections_date['Time'].dt.hour
     detections_date['minute_stamp'] = detections_date['Time'].dt.minute
 
@@ -71,9 +71,19 @@ if bird is not None:
     for i in range(24):
         timestamp.append(time(i, 0))
         timestamp.append(time(i, 30))
+        # s_row = pd.Series([time(i, 0), 0, 0, 0, 0], index=detection_count.columns)
     # st.write(timestamp)
     # timeline_df['timestamp24h'] = timestamp
     st.write(detections_24h)
+    detection_count = detections_24h.groupby(['datetime_rounded']).count()
+
+    # date = detections_24h['datetime_rounded'][0]
+
+    for time in timestamp:
+        # s_row = pd.Series([time, 0,0,0,0], index=detection_count.columns
+        # st.write(date.set_time(time))
+        detection_count.loc[len(detection_count.index)] = [time, 0,0,0,0]
+    st.write(detection_count)
 
     st.line_chart(detections_24h, x='datetime_rounded', y='Com_Name')
 
