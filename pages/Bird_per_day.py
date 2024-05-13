@@ -2,6 +2,8 @@ import streamlit as st
 from datetime import date, time
 import pandas as pd
 
+from logic.bird_apis import get_desc_from_wiki, get_pic_from_flickr
+
 st.set_page_config(
     page_title="Birdnet Analyzer",
     page_icon=':bird:'
@@ -65,6 +67,7 @@ confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, va
 bird = st.selectbox("Select a Bird", get_different_birds(confidence / 100))
 
 if bird is not None:
+
     detections_24h = get_times_at_date(confidence / 100, date.today(), bird)
 
     timestamp = []
@@ -74,7 +77,7 @@ if bird is not None:
         # s_row = pd.Series([time(i, 0), 0, 0, 0, 0], index=detection_count.columns)
     # st.write(timestamp)
     # timeline_df['timestamp24h'] = timestamp
-    st.write(detections_24h)
+    #st.write(detections_24h)
     detection_count = detections_24h.groupby(['datetime_rounded']).count()
 
     # date = detections_24h['datetime_rounded'][0]
@@ -83,11 +86,21 @@ if bird is not None:
         # s_row = pd.Series([time, 0,0,0,0], index=detection_count.columns
         # st.write(date.set_time(time))
         detection_count.loc[len(detection_count.index)] = [time, 0,0,0,0]
-    st.write(detection_count)
+    #st.write(detection_count)
 
-    st.line_chart(detections_24h, x='datetime_rounded', y='Com_Name')
+    #st.line_chart(detections_24h, x='datetime_rounded', y='Com_Name')
 
     detections_per_bird = get_detections_per_bird(confidence / 100, bird)
+
+    st.subheader("Description")
+    pic_url = get_pic_from_flickr(detections_per_bird["Com_Name"][0])
+    if pic_url is not None:
+        st.image(pic_url)
+
+    desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0])
+    if desc is not None:
+        st.write(desc)
+
 
     st.bar_chart(detections_per_bird, x='Date', y='count')
 
