@@ -92,14 +92,18 @@ if bird is not None:
 
     detections_per_bird = get_detections_per_bird(confidence / 100, bird)
 
-    st.subheader("Description")
     pic_url = get_pic_from_flickr(detections_per_bird["Com_Name"][0])
-    if pic_url is not None:
-        st.image(pic_url)
-
     desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0])
-    if desc is not None:
-        st.write(desc)
+    if pic_url is not None or desc is not None:
+        st.subheader("Description")
+
+    col1, col2 = st.columns([1, 2])
+    with col1:
+        if pic_url is not None:
+            st.image(pic_url, caption=detections_per_bird["Com_Name"][0])
+    with col2:
+        if desc is not None:
+            st.write(desc)
 
 
     st.bar_chart(detections_per_bird, x='Date', y='count')

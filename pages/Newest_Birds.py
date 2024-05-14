@@ -2,6 +2,8 @@ import streamlit as st
 from datetime import date, timedelta
 import pandas as pd
 
+from logic.bird_apis import get_pic_from_flickr
+
 st.set_page_config(
     page_title="Birdnet Analyzer",
     page_icon=':bird:'
@@ -42,9 +44,18 @@ confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, va
 #days = st.sidebar.slider("Days", max_value=365, min_value=1, value=365, help="Days for detection")
 #date_from = date.today() - timedelta(days=days)
 
+
 birds_df = get_newest_bird_detections(confidence / 100, daily=daily)
 number_new_birds_today = len(birds_df[birds_df['min(date)'] == date.today().isoformat()].index)
-st.metric("Different Birds", len(birds_df.index), f'{number_new_birds_today} new today')
+
+col1, col2 = st.columns([1, 1])
+with col1:
+    st.metric("Different Birds", len(birds_df.index), f'{number_new_birds_today} new today')
+with col2:
+    pic_url = get_pic_from_flickr(birds_df['Com_Name'][0])
+    if pic_url is not None:
+        st.write("Newest:")
+        st.image(pic_url, caption=birds_df["Com_Name"][0])
 
 st.subheader("Newest Birds")
 st.dataframe(birds_df, column_config={
