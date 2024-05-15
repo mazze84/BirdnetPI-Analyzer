@@ -52,10 +52,12 @@ st.dataframe(birds_df, column_config={
     "File_Name": "File Name"
 }, hide_index=True, use_container_width=True)
 
-for i in range(birds_df.size -1):
-    filename = birds_df['File_Name'][i].replace(':', ' ')
-    bird_name = birds_df['Com_Name'][i]
-    path = Path(f'By_Date/{date_detections}/{bird_name}/{filename}')
-    if path.is_file():
-        st.image(str(path) + '.png', caption=f'{bird_name}')
-        st.audio(str(path))
+print(birds_df.size)
+if (birds_df.size >= 10):
+    for i in range(10):
+        filename = birds_df['File_Name'][i].replace(':', ' ')
+        bird_name = birds_df['Com_Name'][i]
+        path = Path(f'By_Date/{date_detections}/{bird_name}/{filename}')
+        if path.is_file():
+            st.image(str(path) + '.png', caption=f'{bird_name}')
+            st.audio(str(path))
