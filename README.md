@@ -12,5 +12,5 @@ First you need to pull the repository
 ``` Console
 git pull https://github.com/mazze84/Birdnet-Analyzer.git
 ```
-You can run install.sh to create the environment and install the neccessary libs
+You can run install.sh to create the environment.
 After that you can start it with start.sh
