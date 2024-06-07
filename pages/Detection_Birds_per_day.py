@@ -34,8 +34,10 @@ def get_least_detections_per_day(confidence, ttl=3600):
                                        ttl=ttl, params={"confidence": confidence})
     return detections_per_day_df
 
+if st.session_state.confidence is None:
+    st.session_state.confidence = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
-                               help="Confidence for detection of birds in Percent", key='confidence')
+                               help="Confidence for detection of birds in Percent")
 
 most_per_day_df = get_most_detections_per_day(confidence / 100)
 least_per_day_df = get_least_detections_per_day(confidence / 100)

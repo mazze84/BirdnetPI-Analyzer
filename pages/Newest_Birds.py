@@ -33,9 +33,10 @@ st.title("Birdnet Analyzer")
 
 
 daily = st.sidebar.checkbox("Daily")
-
+if st.session_state.confidence is None:
+    st.session_state.confidence = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
-                               help="Confidence for detection of birds in Percent", key='confidence')
+                               help="Confidence for detection of birds in Percent")
 
 #days = st.sidebar.slider("Days", max_value=365, min_value=1, value=365, help="Days for detection")
 #date_from = date.today() - timedelta(days=days)

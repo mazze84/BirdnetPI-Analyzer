@@ -61,8 +61,10 @@ def get_times_at_date(confidence, date, common_name, ttl=3600):
 
 st.title("Detections of bird per day")
 
+if st.session_state.confidence is None:
+    st.session_state.confidence = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
-                               help="Confidence for detection of birds in Percent", key='confidence')
+                               help="Confidence for detection of birds in Percent")
 bird = st.selectbox("Select a Bird", get_different_birds(confidence / 100))
 
 if bird is not None:

@@ -21,9 +21,10 @@ def get_newest_bird_detections(confidence, date_detections, ttl=60):
     birds_df["Confidence"] = birds_df["Confidence"] * 100
 
     return birds_df
-
+if st.session_state.confidence is None:
+    st.session_state.confidence = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
-                               help="Confidence for detection of birds in Percent", key='confidence')
+                               help="Confidence for detection of birds in Percent")
 
 date_detections = st.sidebar.date_input("Date of detections")
 
