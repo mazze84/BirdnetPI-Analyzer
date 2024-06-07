@@ -22,9 +22,6 @@ def get_newest_bird_detections(confidence, date_detections, ttl=60):
 
     return birds_df
 
-
-if 'confidence' not in st.session_state:
-    st.session_state['confidence'] = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
                                help="Confidence for detection of birds in Percent", key='confidence')
 

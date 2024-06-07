@@ -22,8 +22,6 @@ def get_most_active_bird(confidence, order_by, ttl=60):
 
     return birds_df
 
-if 'confidence' not in st.session_state:
-    st.session_state['confidence'] = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
                                help="Confidence for detection of birds in Percent", key='confidence')
 limit = st.sidebar.slider("How many birds will be shown", max_value=30, min_value=1, value=15,
