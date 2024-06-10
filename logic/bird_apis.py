@@ -9,7 +9,11 @@ def get_desc_from_wiki(science_name, lang='en'):
     wiki_desc = ""
     for value in response['query']['pages']:
         wiki_desc = response['query']['pages'][value]['extract']
-
+    if len(wiki_desc) > 400:
+        wiki_desc = wiki_desc[0:400]
+        wiki_desc = wiki_desc[0: wiki_desc.rfind(" ")] + "..."
+    bird_name = science_name.replace(" ", "_")
+    wiki_desc += f"[https://{lang}.wikipedia.org/wiki/{bird_name}]"
     return wiki_desc
 
 @st.cache_data
@@ -22,6 +26,6 @@ def get_pic_from_flickr(common_name):
     flickr_resp = requests.get(url=flickr_url, headers=headers)
     data = flickr_resp.json()["photos"]["photo"][0]
 
-    image_url = 'https://farm'+str(data["farm"])+'.static.flickr.com/'+str(data["server"])+'/'+str(data["id"])+'_'+str(data["secret"])+'_n.jpg'
+    image_url = 'https://farm'+str(data["farm"])+'.static.flickr.com/'+str(data["server"])+'/'+str(data["id"])+'_'+str(data["secret"])+'.jpg'
     return image_url
 
