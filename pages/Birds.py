@@ -59,7 +59,7 @@ def get_times_at_date(confidence, date, common_name, ttl=3600):
     return detections_date
 
 
-st.title("Detections of bird per day")
+st.title("Detected birds")
 
 if "confidence" not in st.session_state:
     st.session_state.confidence = 70
@@ -94,7 +94,13 @@ if bird is not None:
     detections_per_bird = get_detections_per_bird(confidence / 100, bird)
 
     pic_url = get_pic_from_flickr(detections_per_bird["Com_Name"][0])
-    desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0])
+
+    if "language" in st.secrets:
+        lang = st.secrets["language"]
+        desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0], lang)
+    else:
+        desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0])
+
     if pic_url is not None or desc is not None:
         st.subheader("Description")
 

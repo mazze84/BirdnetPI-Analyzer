@@ -1,8 +1,9 @@
 import requests
 import streamlit as st
 
-def get_desc_from_wiki(science_name):
-    url = f"https://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles={science_name}"
+@st.cache_data
+def get_desc_from_wiki(science_name, lang='en'):
+    url = f"https://{lang}.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&exintro&explaintext&redirects=1&titles={science_name}"
     response = requests.get(url)
     response = response.json()
     wiki_desc = ""
@@ -11,6 +12,7 @@ def get_desc_from_wiki(science_name):
 
     return wiki_desc
 
+@st.cache_data
 def get_pic_from_flickr(common_name):
     headers = {'User-Agent': 'Python_Flickr/1.0'}
     flickr_api = st.secrets["flickr_api"]

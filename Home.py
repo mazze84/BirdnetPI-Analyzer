@@ -51,7 +51,12 @@ with col1:
     if pic_url is not None:
         st.image(pic_url, caption=birds_df["Com_Name"][0])
 with col2:
-    desc = get_desc_from_wiki(birds_df["Sci_Name"][0])
+    if "language" in st.secrets:
+        lang = st.secrets["language"]
+        desc = get_desc_from_wiki(birds_df["Sci_Name"][0], lang)
+    else:
+        desc = get_desc_from_wiki(birds_df["Sci_Name"][0])
+
     if desc is not None:
         st.write(desc)
 
