@@ -33,7 +33,8 @@ st.title("Birdnet Analyzer")
 
 
 daily = st.sidebar.checkbox("Daily")
-if st.session_state.confidence is None:
+
+if "confidence" not in st.session_state:
     st.session_state.confidence = 70
 confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, value=st.session_state.confidence,
                                help="Confidence for detection of birds in Percent")
