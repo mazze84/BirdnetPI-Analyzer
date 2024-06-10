@@ -8,6 +8,7 @@ st.set_page_config(
 )
 
 
+@st.cache_data
 def get_most_active_bird(confidence, order_by, ttl=60):
     conn = st.connection('birds_db', type='sql')
 

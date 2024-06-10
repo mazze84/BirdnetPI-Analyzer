@@ -9,7 +9,7 @@ st.set_page_config(
     page_icon=':bird:'
 )
 
-
+@st.cache_data
 def get_different_birds(confidence, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 
@@ -18,6 +18,7 @@ def get_different_birds(confidence, ttl=3600):
     return different_birds
 
 
+@st.cache_data
 def get_detections_per_bird(confidence, common_name, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 
@@ -30,7 +31,7 @@ def get_detections_per_bird(confidence, common_name, ttl=3600):
                                      ttl=ttl, params={"confidence": confidence, "common_name": common_name})
     return detections_per_bird
 
-
+@st.cache_data
 def get_times_at_date(confidence, date, common_name, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 

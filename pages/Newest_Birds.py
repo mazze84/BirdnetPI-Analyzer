@@ -9,7 +9,7 @@ st.set_page_config(
     page_icon=':bird:'
 )
 
-
+@st.cache_data
 def get_newest_bird_detections(confidence, daily=False, ttl=3600):
     conn = st.connection('birds_db', type='sql')
     where = ""

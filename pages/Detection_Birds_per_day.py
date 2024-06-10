@@ -7,6 +7,7 @@ st.set_page_config(
 )
 
 
+@st.cache_data
 def get_most_detections_per_day(confidence, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 
@@ -21,6 +22,7 @@ def get_most_detections_per_day(confidence, ttl=3600):
     return detections_per_day_df
 
 
+@st.cache_data
 def get_least_detections_per_day(confidence, ttl=3600):
     conn = st.connection('birds_db', type='sql')
 
