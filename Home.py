@@ -2,6 +2,8 @@ from pathlib import Path
 import streamlit as st
 import altair as alt
 
+from logic.bird_apis import get_pic_from_flickr, get_desc_from_wiki
+
 st.set_page_config(
     page_title="Birdnet Analyzer",
     page_icon=':bird:'
@@ -41,6 +43,18 @@ st.altair_chart(alt.Chart(number_detections).mark_bar().encode(
     x=alt.X('Common Name', sort=None),
     y='Count',
 ), use_container_width=True)
+
+st.subheader("Last detected bird:")
+col1, col2 = st.columns([1, 1])
+with col1:
+    pic_url = get_pic_from_flickr(birds_df['Com_Name'][0])
+    if pic_url is not None:
+        st.image(pic_url, caption=birds_df["Com_Name"][0])
+with col2:
+    desc = get_desc_from_wiki(birds_df["Sci_Name"][0])
+    if desc is not None:
+        st.write(desc)
+
 
 st.dataframe(birds_df, column_config={
     "Date": st.column_config.DateColumn("Date", help="Date of the first detection",
