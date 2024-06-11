@@ -45,20 +45,22 @@ st.altair_chart(alt.Chart(number_detections).mark_bar().encode(
 ), use_container_width=True)
 
 st.subheader("Last detected bird:")
-col1, col2 = st.columns([1, 1])
-with col1:
-    pic_url = get_pic_from_flickr(birds_df['Com_Name'][0])
-    if pic_url is not None:
-        st.image(pic_url, caption=birds_df["Com_Name"][0])
-with col2:
-    if "language" in st.secrets:
-        lang = st.secrets["language"]
-        desc = get_desc_from_wiki(birds_df["Sci_Name"][0], lang)
-    else:
-        desc = get_desc_from_wiki(birds_df["Sci_Name"][0])
 
-    if desc is not None:
-        st.write(desc)
+if len(birds_df) > 0:
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        pic_url = get_pic_from_flickr(birds_df['Com_Name'][0])
+        if pic_url is not None:
+            st.image(pic_url, caption=birds_df["Com_Name"][0])
+    with col2:
+        if "language" in st.secrets:
+            lang = st.secrets["language"]
+            desc = get_desc_from_wiki(birds_df["Sci_Name"][0], lang)
+        else:
+            desc = get_desc_from_wiki(birds_df["Sci_Name"][0])
+
+        if desc is not None:
+            st.write(desc)
 
 
 st.dataframe(birds_df, column_config={
