@@ -4,6 +4,7 @@ You should ad the following into your secrets.toml:
 
 ``` Console
 flickr_api = "[optional]"
+language = "de"
 
 [connections.birds_db]
 url = "sqlite:///../BirdNet-Pi/scripts/birds.db"
