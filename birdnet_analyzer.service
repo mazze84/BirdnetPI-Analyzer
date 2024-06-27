@@ -6,7 +6,7 @@ After=network.target
 [Service]
 User=[username]
 WorkingDirectory=/home/[username]/Birdnet-Analyzer/
-ExecStart=/bin/bash -c 'source /home/[username]/Birdnet-Analyzer/venv/bin/activate && exec python -m streamlit run /home/[username]/Birdnet-Analyzer/Home.py --server.port 8502'
+ExecStart=/bin/bash -c 'source /home/[username]/BirdnetPI-Analyzer/venv/bin/activate && exec python -m streamlit run /home/[username]/BirdnetPI-Analyzer/Home.py --server.port 8502'
 Restart=always
 RestartSec=10
 Environment=PATH=/usr/local/bin:/usr/bin:/bin
