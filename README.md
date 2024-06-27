@@ -11,7 +11,7 @@ url = "sqlite:///../BirdNet-Pi/scripts/birds.db"
 ```
 First you need to pull the repository
 ``` Console
-git pull https://github.com/mazze84/Birdnet-Analyzer.git
+git pull https://github.com/mazze84/BirdnetPI-Analyzer.git
 ```
 You can run install.sh to create the environment.
 After that you can start it with start.sh
