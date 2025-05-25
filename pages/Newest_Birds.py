@@ -50,7 +50,7 @@ col1, col2 = st.columns([1, 1])
 with col1:
     st.metric("Different Birds", len(birds_df.index), f'{number_new_birds_today} new today')
 with col2:
-    pic_url = get_pic_from_flickr(birds_df['Com_Name'][0])
+    pic_url = get_pic_from_flickr(birds_df['Sci_Name'][0])
     if pic_url is not None:
         st.write("Newest:")
         st.image(pic_url, caption=birds_df["Com_Name"][0])
