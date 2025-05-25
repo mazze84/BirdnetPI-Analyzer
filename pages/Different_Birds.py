@@ -29,6 +29,8 @@ def get_detections_per_bird(confidence, common_name, ttl=3600):
                                      " GROUP BY Date"
                                      " ORDER BY Date desc",
                                      ttl=ttl, params={"confidence": confidence, "common_name": common_name})
+    detections_per_bird["Confidence"] = detections_per_bird["Confidence"] * 100
+
     return detections_per_bird
 
 @st.cache_data
@@ -94,14 +96,13 @@ if bird is not None:
 
     detections_per_bird = get_detections_per_bird(confidence / 100, bird)
 
-    pic_url = get_pic_from_flickr(detections_per_bird["Com_Name"][0])
-
     if "language" in st.secrets:
         lang = st.secrets["language"]
         desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0], lang)
     else:
         desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0])
 
+    pic_url = get_pic_from_flickr(detections_per_bird["Sci_Name"][0])
     if pic_url is not None or desc is not None:
         st.subheader("Description")
 
@@ -118,6 +119,7 @@ if bird is not None:
 
     st.dataframe(detections_per_bird, column_config={
         "count": st.column_config.NumberColumn("Detection Count", help="Detection of birds", width="small"),
+        "Confidence": st.column_config.NumberColumn("Confidence", format="%d", width="small"),
         "date": st.column_config.DateColumn("First Detection", help="Date of the detection", format="YYYY-MM-DD"),
         "Com_Name": st.column_config.TextColumn("Common Name", help="common name of the bird", width="medium"),
         "Sci_Name": st.column_config.TextColumn("Scientific Name", help="scientific name of the bird", width="medium"),

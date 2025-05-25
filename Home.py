@@ -49,7 +49,7 @@ st.subheader("Last detected bird:")
 if len(birds_df) > 0:
     col1, col2 = st.columns([1, 1])
     with col1:
-        pic_url = get_pic_from_flickr(birds_df['Com_Name'][0])
+        pic_url = get_pic_from_flickr(birds_df['Sci_Name'][0])
         if pic_url is not None:
             st.image(pic_url, caption=birds_df["Com_Name"][0])
     with col2:
