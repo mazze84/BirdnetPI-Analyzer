@@ -3,6 +3,7 @@ from datetime import date, time
 import pandas as pd
 
 from logic.bird_apis import get_desc_from_wiki, get_pic_from_flickr
+from logic.db_interface import get_rarity
 
 st.set_page_config(
     page_title="Birdnet Analyzer",
@@ -95,14 +96,14 @@ if bird is not None:
     #st.line_chart(detections_24h, x='datetime_rounded', y='Com_Name')
 
     detections_per_bird = get_detections_per_bird(confidence / 100, bird)
-
+    sci_bird = detections_per_bird["Sci_Name"][0]
     if "language" in st.secrets:
         lang = st.secrets["language"]
-        desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0], lang)
+        desc = get_desc_from_wiki(sci_bird, lang)
     else:
-        desc = get_desc_from_wiki(detections_per_bird["Sci_Name"][0])
+        desc = get_desc_from_wiki(sci_bird)
 
-    pic_url = get_pic_from_flickr(detections_per_bird["Sci_Name"][0])
+    pic_url = get_pic_from_flickr(sci_bird)
     if pic_url is not None or desc is not None:
         st.subheader("Description")
 
@@ -110,6 +111,8 @@ if bird is not None:
     with col1:
         if pic_url is not None:
             st.image(pic_url, caption=detections_per_bird["Com_Name"][0])
+        rarity = get_rarity(sci_bird)
+        st.badge(rarity[0], color=rarity[2])
     with col2:
         if desc is not None:
             st.write(desc)

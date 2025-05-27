@@ -2,7 +2,8 @@ from pathlib import Path
 import streamlit as st
 import altair as alt
 
-from logic.bird_apis import get_pic_from_flickr, get_desc_from_wiki
+from logic.bird_apis import get_pic_from_flickr, get_desc_from_wiki, get_short_desc_wiki
+from logic.db_interface import get_rarity
 
 st.set_page_config(
     page_title="Birdnet Analyzer",
@@ -44,24 +45,25 @@ st.altair_chart(alt.Chart(number_detections).mark_bar().encode(
     y='Count',
 ), use_container_width=True)
 
-st.subheader("Last detected bird:")
 
 if len(birds_df) > 0:
+    st.subheader("Last detected bird:")
     col1, col2 = st.columns([1, 1])
     with col1:
         pic_url = get_pic_from_flickr(birds_df['Sci_Name'][0])
         if pic_url is not None:
             st.image(pic_url, caption=birds_df["Com_Name"][0])
+        rarity = get_rarity(birds_df['Sci_Name'][0])
+        st.badge(rarity[0], color=rarity[2])
     with col2:
         if "language" in st.secrets:
             lang = st.secrets["language"]
-            desc = get_desc_from_wiki(birds_df["Sci_Name"][0], lang)
+            desc = get_short_desc_wiki(birds_df["Sci_Name"][0], lang)
         else:
-            desc = get_desc_from_wiki(birds_df["Sci_Name"][0])
+            desc = get_short_desc_wiki(birds_df["Sci_Name"][0])
 
         if desc is not None:
             st.write(desc)
-
 
 st.dataframe(birds_df, column_config={
     "Date": st.column_config.DateColumn("Date", help="Date of the first detection",
@@ -74,7 +76,7 @@ st.dataframe(birds_df, column_config={
 }, hide_index=True, use_container_width=True)
 
 print(birds_df.size)
-if (birds_df.size >= 10):
+if birds_df.size >= 10:
     for i in range(10):
         filename = birds_df['File_Name'][i].replace(':', ' ')
         bird_name = birds_df['Com_Name'][i]
