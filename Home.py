@@ -2,8 +2,9 @@ from pathlib import Path
 import streamlit as st
 import altair as alt
 
-from logic.bird_apis import get_pic_from_flickr, get_desc_from_wiki, get_short_desc_wiki
+from logic.bird_apis import get_pic_from_flickr, get_short_desc_wiki
 from logic.db_interface import get_rarity, get_most_recent_bird_detections, get_rare_bird
+from logic.formatting import format_date
 
 st.set_page_config(
     page_title="Birdnet Analyzer",
@@ -18,7 +19,7 @@ confidence = st.sidebar.slider("Confidence in %", max_value=99, min_value=70, va
 
 date_detections = st.sidebar.date_input("Date of detections")
 
-st.title(f'Birds on {date_detections}')
+st.title(f'Birds on {format_date(date_detections)}')
 birds_df = get_most_recent_bird_detections(confidence / 100, date_detections)
 if len(birds_df) > 0:
     df_rarity = get_rare_bird(confidence / 100, date_detections)

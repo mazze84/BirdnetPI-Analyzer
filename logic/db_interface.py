@@ -118,11 +118,11 @@ def get_newest_bird_detections(confidence, date=None, ttl=3600):
     birds_df = conn.query(
         "select count(*) as count, max(confidence), min(date), sci_name, com_name, min(file_name), min(Cutoff)"
         " from detections"
-        # " where confidence>= :confidence"
+        " where confidence>= :confidence"
         + where +
         " group by sci_name"
         " order by min(date) desc, time desc",
-        ttl=ttl)#, params={"confidence": confidence})
+        ttl=ttl, params={"confidence": confidence})
     birds_df["max(confidence)"] = birds_df["max(confidence)"] * 100
     # birds_df['min(date)'] = pd.to_date(birds_df['min(date)'])
     return birds_df

@@ -1,6 +1,5 @@
 import streamlit as st
 from datetime import date, time
-import pandas as pd
 
 from logic.bird_apis import get_desc_from_wiki, get_pic_from_flickr
 from logic.db_interface import get_rarity, get_different_birds, get_times_at_date, get_detections_per_bird

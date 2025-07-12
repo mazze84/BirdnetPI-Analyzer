@@ -1,5 +1,4 @@
 import streamlit as st
-from datetime import date
 import altair as alt
 
 from logic.db_interface import get_most_active_bird
