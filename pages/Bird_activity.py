@@ -2,27 +2,14 @@ import streamlit as st
 from datetime import date
 import altair as alt
 
+from logic.db_interface import get_most_active_bird
+
 st.set_page_config(
     page_title="Birdnet Analyzer",
     page_icon=':bird:'
 )
 
 
-@st.cache_data
-def get_most_active_bird(confidence, order_by, ttl=60):
-    conn = st.connection('birds_db', type='sql')
-
-    birds_df = conn.query(
-        "select count(*) as Count, avg(confidence) as Confidence, com_name, sci_name"
-        " from detections"
-        " where confidence >= :confidence"
-        " group by sci_name, com_name"
-        " order by count(*) " + order_by +
-        " limit " + str(limit),
-        ttl=ttl, params={"confidence": confidence})
-    birds_df["Confidence"] = birds_df["Confidence"] * 100
-
-    return birds_df
 
 
 if "confidence" not in st.session_state:

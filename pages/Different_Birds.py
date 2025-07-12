@@ -3,64 +3,12 @@ from datetime import date, time
 import pandas as pd
 
 from logic.bird_apis import get_desc_from_wiki, get_pic_from_flickr
-from logic.db_interface import get_rarity
+from logic.db_interface import get_rarity, get_different_birds, get_times_at_date, get_detections_per_bird
 
 st.set_page_config(
     page_title="Birdnet Analyzer",
     page_icon=':bird:'
 )
-
-@st.cache_data
-def get_different_birds(confidence, ttl=3600):
-    conn = st.connection('birds_db', type='sql')
-
-    different_birds = conn.query("SELECT com_name FROM detections WHERE confidence>= :confidence GROUP BY com_name",
-                                 ttl=ttl, params={"confidence": confidence})
-    return different_birds
-
-
-@st.cache_data
-def get_detections_per_bird(confidence, common_name, ttl=3600):
-    conn = st.connection('birds_db', type='sql')
-
-    detections_per_bird = conn.query("SELECT COUNT(date) as count, confidence, date, com_name, sci_name"
-                                     " FROM detections"
-                                     " WHERE com_name= :common_name"
-                                     " AND confidence>= :confidence"
-                                     " GROUP BY Date"
-                                     " ORDER BY Date desc",
-                                     ttl=ttl, params={"confidence": confidence, "common_name": common_name})
-    detections_per_bird["Confidence"] = detections_per_bird["Confidence"] * 100
-
-    return detections_per_bird
-
-@st.cache_data
-def get_times_at_date(confidence, date, common_name, ttl=3600):
-    conn = st.connection('birds_db', type='sql')
-
-    detections_date = conn.query("SELECT time, com_name, sci_name"
-                                 " FROM detections"
-                                 " WHERE com_name= :common_name"
-                                 " AND confidence>= :confidence"
-                                 " AND Date= :date"
-                                 " ORDER BY Time asc",
-                                 ttl=ttl, params={"confidence": confidence, "common_name": common_name, "date": date})
-    detections_date['Time'] = pd.to_datetime(detections_date['Time'], format='%H:%M:%S')
-    detections_date['hour_stamp'] = detections_date['Time'].dt.hour
-    detections_date['minute_stamp'] = detections_date['Time'].dt.minute
-
-    time_rounded = []
-    for time_detection in detections_date['Time']:
-        if time_detection.minute > 45:
-            time_rounded.append(time_detection.replace(hour=time_detection.hour+1 ,minute=0, second=0))
-        elif time_detection.minute > 30:
-            time_rounded.append(time_detection.replace(minute=30, second=0))
-        elif time_detection.minute > 15:
-            time_rounded.append(time_detection.replace(minute=30, second=0))
-        else:
-            time_rounded.append(time_detection.replace(minute=0, second=0))
-    detections_date['datetime_rounded'] = time_rounded
-    return detections_date
 
 
 st.title("Detected birds")
@@ -111,9 +59,12 @@ if bird is not None:
     with col1:
         if pic_url is not None:
             st.image(pic_url, caption=detections_per_bird["Com_Name"][0])
+
+
+    with col2:
         rarity = get_rarity(sci_bird)
         st.badge(rarity[0], color=rarity[2])
-    with col2:
+        st.write(f"Seen {rarity[1]} times in the last 30 Days")
         if desc is not None:
             st.write(desc)
 

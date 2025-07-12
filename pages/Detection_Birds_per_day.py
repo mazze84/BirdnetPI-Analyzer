@@ -1,40 +1,15 @@
 import streamlit as st
 import altair as alt
 
+from logic.db_interface import get_most_detections_per_day, get_least_detections_per_day
+
 st.set_page_config(
     page_title="Birdnet Analyzer",
     page_icon=':bird:'
 )
 
 
-@st.cache_data
-def get_most_detections_per_day(confidence, ttl=3600):
-    conn = st.connection('birds_db', type='sql')
 
-    detections_per_day_df = conn.query("SELECT COUNT(DISTINCT sci_name) as count, date, "
-                                       " GROUP_CONCAT(DISTINCT com_name) AS name_list "
-                                       " FROM detections"
-                                       " WHERE confidence>= :confidence"
-                                       " GROUP BY Date"
-                                       " ORDER BY COUNT(DISTINCT sci_name) desc"
-                                       " LIMIT 15",
-                                       ttl=ttl, params={"confidence": confidence})
-    return detections_per_day_df
-
-
-@st.cache_data
-def get_least_detections_per_day(confidence, ttl=3600):
-    conn = st.connection('birds_db', type='sql')
-
-    detections_per_day_df = conn.query("SELECT COUNT(DISTINCT sci_name) as count, date, "
-                                       " GROUP_CONCAT(DISTINCT com_name) AS name_list "
-                                       " FROM detections"
-                                       " WHERE confidence>= :confidence"
-                                       " GROUP BY Date"
-                                       " ORDER BY COUNT(DISTINCT sci_name) asc"
-                                       " LIMIT 15",
-                                       ttl=ttl, params={"confidence": confidence})
-    return detections_per_day_df
 
 
 if "confidence" not in st.session_state:
